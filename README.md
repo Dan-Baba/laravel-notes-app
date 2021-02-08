@@ -7,56 +7,83 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## About This Project
+This was a learning project to see the full process of start to finish of a Laravel application. It's currently hosted as a Heroku app.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Learned
+Summary of the things learned in this project are as follows.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+#### Migrations
+Migrations files are super useful when working on a team and for deploying database changes to production environments as well. An example is the Notes table which is pretty simple we only need a few things:
+* Id
+* title
+* content
+* soft-delete field
+* user_id (owner)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```
+public function up()
+{
+    Schema::create('notes', function (Blueprint $table) {
+        $table->id();
+        $table->timestamps();
+        $table->string('title'); // Smaller title field.
+        $table->text('content'); // Bigger content field.
+        $table->boolean('deleted')->default('0'); // Adding default value so we don't need to specify all new notes are not deleted...
+        $table->integer('user_id'); // Fits the model of 'user' _ 'id' so Eloquent will automatically know what this field is used for.
+    });
+}
+```
 
-## Learning Laravel
+There are 2 function in a migration file. up() and down() and they're just opposites of each other. up() is for creating the table, so it should describe what the table should look like when created. down() is for tearing it down and is usually just 'Schema::dropIfExists('table_name');'
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+After pulling a project with migration files you can run
+```
+php artisan migrate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+and the tables should be automatically created for you and you're all set to run the project.
 
-## Laravel Sponsors
+If you mess up your tables and  you want to refresh your migrations (roll back all changes and start fresh again with new data and everything)
+```
+php artisan migration:refresh
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+This is where seeding data comes in, so you can have some basic data ready to seed into a freshly refreshed database.
 
-### Premium Partners
+#### Eloquent (ORM)
+This simple relationship is easy to accomplish in the Http\Models\Note.php file we tell Eloquent about the relationship by adding
+```
+public function user()
+{
+    return $this->belongsTo('App\Models\User');
+}
+```
+So now it will automatically associate a Note with a user by converting the object name and converting to snake case and adding id to the end. So the Foreign Key it will automatically use is 'user_id'.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/)**
-- **[OP.GG](https://op.gg)**
+Now we want to create the inverse of this relationship, because a Note has a owning User but a User also has many Notes so we open Http\Models\User.php
+```
+public function notes()
+{
+    return $this->hasMany('App\Models\Note');
+}
+```
 
-## Contributing
+Now with this in code we can use this relationship to say get all Notes that a User owns by doing something like this.
+```
+$user = Auth::user(); // Get logged in User first.
+$notes = $user->notes(); // Get notes this User owns.
+$singleNote = $user->notes()->find(1); // Alternatively we can further filter (Thanks to Eloquent) and get Notes a user owns, but only a single id (1 in this case). 
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Authentication
+Using the built in authentication is just too easy with Laravel, I went with the LiveWire method because it seemed closest to what I wanted then stripped out everything that didn't fit with the project (wanted it simple, no password recory because that wasn't the point of the project).
 
-## Code of Conduct
+Next I'll need to look into how these are implemented though, because for now it's just kind of magic to me, which isn't good.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Testing
+TBD, need to do more work here.
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Live Project
+https://laravel-notes-app.herokuapp.com/
