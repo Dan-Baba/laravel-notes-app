@@ -42,7 +42,12 @@ class NoteController extends Controller
 
     public function getNote($id)
     {
-        return view('edit', ['note' => Note::find($id)]);
+        $user = Auth::user();
+        $note = $user->notes()->find($id);
+        if ($note == null) {
+            return view('errors.404');
+        }
+        return view('edit', ['note' => $note]);
     }
 
     public function editNote(Request $request)
