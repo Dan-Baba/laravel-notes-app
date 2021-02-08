@@ -34,9 +34,7 @@ class NoteController extends Controller
     public function getUserNotes() 
     {
         $user = Auth::user();
-        $notes = Note::where('deleted', '=', '0')
-            ->where('user_id', '=', $user->id)
-            ->get();
+        $notes = $user->notes()->where('deleted', '=', '0')->get();
         return view('home', ['notes' => $notes]);
     }
 
