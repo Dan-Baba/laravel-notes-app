@@ -13,9 +13,29 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-})->middleware('auth')->name('home');
+Route::get('/', [
+    'uses' => 'App\Http\Controllers\NoteController@getUserNotes',
+    'as' => 'home'
+])->middleware('auth');
+
+Route::get('/edit/{id}', [
+    'uses' => 'App\Http\Controllers\NoteController@getNote',
+    'as' => 'edit'
+])->middleware('auth');
+
+Route::post('/update', [
+    'uses' => 'App\Http\Controllers\NoteController@editNote',
+    'as' => 'update'
+])->middleware('auth');
+
+Route::get('/new', function () {
+    return view('new');
+})->middleware('auth')->name('new');
+
+Route::post('/new', [
+    'uses' => 'App\Http\Controllers\NoteController@postNote',
+    'as' => 'postNew'
+])->middleware('auth');
 
 Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
     return view('dashboard');

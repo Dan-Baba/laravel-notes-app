@@ -8,7 +8,7 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             @auth
                 <li class="nav-item">
-                    <a class="nav-link" href="#">New Note</a>
+                    <a class="nav-link" href="{{ route('new') }}">New Note</a>
                 </li>
                 <li class="nav-item">
                     <form method="POST" action="{{ route('logout') }}">
