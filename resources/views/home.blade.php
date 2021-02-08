@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('content')
-
+@include('partials.info')
 
 <div class="row">
     @foreach($notes as $note)
